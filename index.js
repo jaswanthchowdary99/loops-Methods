@@ -3,17 +3,12 @@ const got = require("../loops-methods/data");
 // Counting all the people in the given data.
 
 function countAllPeople(got) {
-    let totalCount = 0;
-
-    for (let i = 0; i < got.houses.length; i++) {
-        let house = got.houses[i];
-
-        if (house.people) {
-            for (let j = 0; j < house.people.length; j++) {
-                totalCount++;
-            }
+    const totalCount = got.houses.reduce((count, house) => {
+        if (house.hasOwnProperty('people')) {
+            return count + house.people.length;
         }
-    }
+        return count;
+    }, 0);
 
     return totalCount;
 }
@@ -27,34 +22,23 @@ console.log(result);
 //Number of people in different houses.
 
 function peopleByHouses(got) {
-    let housesCount = {};
-
-    for (let i = 0; i < got.houses.length; i++) {
-        let house = got.houses[i];
-        if (Array.isArray(house.people)) {
-            housesCount[house.name] = house.people.length;
-        }
-    }
-
-    return housesCount;
+    return got.houses.reduce((housesCount, house) => {
+        housesCount[house.name] = house.people.length;
+        return housesCount;
+    }, {});
 }
 
 const resultPeopleByHouses = peopleByHouses(got);
 console.log(resultPeopleByHouses);
 
 
-
 // Name of everyperson from the given data.
 
 function everyone(got) {
-    let peoplecount = [];
-    for (let index = 0; index < got.houses.length; index++) {
-        let house = got.houses[index];
-        for (let index1 = 0; index1 < house.people.length; index1++) {
-            let person = house.people[index1];
-            peoplecount.push(person.name);
-        }
-    }
+    const peoplecount = got.houses.reduce((acc, house) => {
+        const names = house.people.map(person => person.name);
+        return acc.concat(names);
+    }, []);
     return peoplecount;
 }
 
@@ -63,22 +47,18 @@ console.log(resultEveryone);
 
 
 
-
 //  People names with 'S' or 's' in it
+
 function nameWithS(got) {
-    let peopleStartsWithS = [];
+    const peopleStartsWithS = [];
 
-    for (let i = 0; i < got.houses.length; i++) {
-        let house = got.houses[i];
-
-        for (let j = 0; j < house.people.length; j++) {
-            let person = house.people[j];
-
-            if (person.name.toLowerCase().includes('s')||person.name.toUpperCase().includes('S')) {
+    got.houses.forEach(house => {
+        house.people.forEach(person => {
+            if (person.name.toLowerCase().includes('s')||person.name.toLowerCase().includes('S')) {
                 peopleStartsWithS.push(person.name);
             }
-        }
-    }
+        });
+    });
 
     return peopleStartsWithS;
 }
@@ -89,23 +69,18 @@ console.log(resultNameWithS);
 
 
 
-
 //  People names with 'A' or 'a' in it
 
 function nameWithA(got) {
-    let peopleStartsWithA = [];
+    const peopleStartsWithA = [];
 
-    for (let i = 0; i < got.houses.length; i++) {
-        let house = got.houses[i];
-
-        for (let j = 0; j < house.people.length; j++) {
-            let person = house.people[j];
-
-            if (person.name.toLowerCase().includes('a')||person.name.toUpperCase().includes('A')) {
+    got.houses.forEach(house => {
+        house.people.forEach(person => {
+            if (person.name.toLowerCase().includes('a')||person.name.toLowerCase().includes('A')) {
                 peopleStartsWithA.push(person.name);
             }
-        }
-    }
+        });
+    });
 
     return peopleStartsWithA;
 }
@@ -116,71 +91,48 @@ console.log(resultNameWithA);
 
 
 
-
 //  People surnames starting with 'S'.
+
 function surNameWithS(got) {
-    let peopleSurNameStartsWithS = [];
-    for (let index = 0; index < got.houses.length; index++) {
-        let house = got.houses[index];
-        for (let index1 = 0; index1 < house.people.length; index1++) {
-            let person = house.people[index1];
-            let nameParts = person.name.split(' ');
-            let lastName = nameParts[nameParts.length - 1];
-            if (lastName.charAt(0).toUpperCase() === 'S') {
-                peopleSurNameStartsWithS.push(person.name);
-            }
-        }
-    }
-    return peopleSurNameStartsWithS;
+    return got.houses.flatMap(house =>
+        house.people.filter(person => {
+            const nameParts = person.name.split(' ');
+            const lastName = nameParts[nameParts.length - 1];
+            return lastName.charAt(0).toUpperCase() === 'S';
+        }).map(person => person.name)
+    );
 }
 
 const resultSurNameWithS = surNameWithS(got);
 console.log(resultSurNameWithS);
 
 
-
 //  People surnames starting with 'A'.
 
 function surNameWithA(got) {
-    let peopleSurNameStartsWithA = [];
-    for (let index = 0; index < got.houses.length; index++) {
-        let house = got.houses[index];
-        for (let index1 = 0; index1 < house.people.length; index1++) {
-            let person = house.people[index1];
-            let nameParts = person.name.split(' ');
-            let lastName = nameParts[nameParts.length - 1];
-            if (lastName.charAt(0).toUpperCase() === 'A') {
-                peopleSurNameStartsWithA.push(person.name);
-            }
-        }
-    }
-    return peopleSurNameStartsWithA;
+    return got.houses.flatMap(house =>
+        house.people.filter(person => {
+            const nameParts = person.name.split(' ');
+            const lastName = nameParts[nameParts.length - 1];
+            return lastName.charAt(0).toUpperCase() === 'A';
+        }).map(person => person.name)
+    );
 }
 
 const resultSurNameWithA = surNameWithA(got);
 console.log(resultSurNameWithA);
 
 
-
 // Names of houses with values from the given data.
 function peopleNameOfAllHouses(got) {
-    let peopleByHouse = {};
-
-    for (let index = 0; index < got.houses.length; index++) {
-        let house = got.houses[index];
+    return got.houses.reduce((result, house) => {
         let houseName = house.name;
-        let peopleInHouse = [];
-
-        for (let index1 = 0; index1 < house.people.length; index1++) {
-            let person = house.people[index1];
-            peopleInHouse.push(person.name);
-        }
-
-        peopleByHouse[houseName] = peopleInHouse;
-    }
-
-    return peopleByHouse;
+        let peopleNames = house.people.map(person => person.name);
+        result[houseName] = peopleNames;
+        return result;
+    }, {});
 }
 
 const resultPeopleNameOfAllHouses = peopleNameOfAllHouses(got);
 console.log(resultPeopleNameOfAllHouses);
+
